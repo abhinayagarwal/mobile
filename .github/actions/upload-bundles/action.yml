@@ -75,6 +75,7 @@ runs:
       run: |
         cd build
         mkdir -p "${{ inputs.platform }}/allobjs"
+        ls ${{ inputs.platform }}
         cd "${{ inputs.platform }}/allobjs"
         find ../.. -name "*.a" -exec ar x {} \;
         ar rcs ../libjdk.a *.o
