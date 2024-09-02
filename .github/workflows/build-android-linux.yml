@@ -107,8 +107,10 @@ jobs:
 
       - name: 'Android NDK'
         uses: nttld/setup-ndk@v1
+        id: setup-ndk
         with:
           ndk-version: r26c
+          add-to-path: false
 
       - name: 'Configure'
         run: >
@@ -128,6 +130,8 @@ jobs:
           echo "Dumping config.log:" &&
           cat config.log &&
           exit 1)
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
       - name: 'Build'
         id: build
