@@ -115,7 +115,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: ./dist
-          pattern: *
+          pattern: '*64'
           merge-multiple: true
       - run: ls -R ./dist
       - name: Zip downloaded artifact
