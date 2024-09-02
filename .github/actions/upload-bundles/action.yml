@@ -76,9 +76,10 @@ runs:
         cd build
         mkdir -p "${{ inputs.platform }}/allobjs"
         cd "${{ inputs.platform }}/allobjs"
-        find .. -name "*.a" -exec ar x {} \;
+        find ../.. -name "*.a" -exec ar x {} \;
         ar rcs ../libjdk.a *.o
         cd ..
+        ls
         rm -rf allobjs
       shell: bash
       if: inputs.make-target == 'static-libs' && inputs.debug-suffix != '-debug' && !startsWith(inputs.platform, 'windows')
