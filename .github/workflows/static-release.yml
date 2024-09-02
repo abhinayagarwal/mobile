@@ -36,6 +36,7 @@ jobs:
     uses: ./.github/workflows/build-android-linux.yml
     with:
       platform: linux-x64
+      make-target: 'static-libs'
       gcc-major-version: '10'
 
   build-ios-macos-aarch64:
@@ -44,22 +45,79 @@ jobs:
     with:
       platform: macos-aarch64
       runs-on: 'macos-14'
+      make-target: 'static-libs'
       xcode-toolset-version: '14.3.1'
 
-  early-access:
-    needs: [ build-android-linux-aarch64, build-ios-macos-aarch64 ]
+  build-linux-x64:
+    name: linux-x64
+    needs: select
+    uses: ./.github/workflows/build-linux.yml
+    with:
+      platform: linux-x64
+      make-target: 'static-libs'
+      gcc-major-version: '10'
+      debug-levels: '[ "release" ]'
+
+  build-macos-x64:
+    name: macos-x64
+    needs: select
+    uses: ./.github/workflows/build-macos.yml
+    with:
+      platform: macos-x64
+      runs-on: 'macos-13'
+      make-target: 'static-libs'
+      xcode-toolset-version: '14.3.1'
+      debug-levels: '[ "release" ]'
+
+  build-macos-aarch64:
+    name: macos-aarch64
+    needs: select
+    uses: ./.github/workflows/build-macos.yml
+    with:
+      platform: macos-aarch64
+      runs-on: 'macos-14'
+      make-target: 'static-libs'
+      xcode-toolset-version: '14.3.1'
+      debug-levels: '[ "release" ]'
+
+  build-windows-x64:
+    name: windows-x64
+    needs: select
+    uses: ./.github/workflows/build-windows.yml
+    with:
+      platform: windows-x64
+      make-target: 'static-libs'
+      msvc-toolset-version: '14.29'
+      msvc-toolset-architecture: 'x86.x64'
+      debug-levels: '[ "release" ]'
+
+  build-windows-aarch64:
+    name: windows-aarch64
+    needs: select
+    uses: ./.github/workflows/build-windows.yml
+    with:
+      platform: windows-aarch64
+      make-target: 'static-libs'
+      msvc-toolset-version: '14.29'
+      msvc-toolset-architecture: 'arm64'
+      extra-conf-options: '--openjdk-target=aarch64-unknown-cygwin'
+      debug-levels: '[ "release" ]'
+
+  release:
+    needs: [ build-android-linux-aarch64, build-ios-macos-aarch64,
+             build-linux-x64,
+             build-macos-x64, build-macos-aarch64,
+             build-windows-x64, build-windows-aarch64
+    ]
     runs-on: ubuntu-20.04
     steps:
       - name: Download all build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: android-linux-aarch64
-          path: ./dist/android-linux-aarch64
-      - name: Download all build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: ios-macos-aarch64
-          path: ./dist/ios-macos-aarch64
+          path: ./dist
+          pattern: *
+          merge-multiple: true
+      - run: ls -R ./dist
       - name: Zip downloaded artifact
         run: |
           cd ./dist
