@@ -74,8 +74,8 @@ runs:
     - name: 'Create libjdk.a'
       run: |
         cd build
-        mkdir -p allobjs
-        cd allobjs
+        mkdir -p "${{ inputs.platform }}/allobjs"
+        cd "${{ inputs.platform }}/allobjs"
         find .. -name "*.a" -exec ar x {} \;
         ar rcs ../libjdk.a *.o
         cd ..
@@ -106,6 +106,12 @@ runs:
           # Change directory to where .lib files are located
           cd build
         
+          # Create the platform-specific directory
+          $platformDir = "${{ inputs.platform }}"
+          if (-not (Test-Path $platformDir)) {
+            New-Item -Path $platformDir -ItemType Directory
+          }
+        
           # Collect all .lib files in the directory and subdirectories
           $libFiles = Get-ChildItem -Path . -Filter *.lib -Recurse | Select-Object -ExpandProperty FullName
         
@@ -116,7 +122,7 @@ runs:
           }
         
           # Prepare the command arguments
-          $arguments = "/OUT:libjdk.lib " + ($libFiles -join " ")
+          $arguments = "/OUT:$platformDir\libjdk.lib " + ($libFiles -join " ")
         
           # Construct the command
           $command = "& `"$libPath`" $arguments"
@@ -126,7 +132,7 @@ runs:
           Invoke-Expression $command
         
           # Check if the output file was created
-          if (Test-Path "libjdk.lib") {
+          if (Test-Path "$platformDir\libjdk.lib") {
             Write-Output "Successfully created libjdk.lib"
           } else {
             Write-Output "Failed to create libjdk.lib"
@@ -151,6 +157,6 @@ runs:
       uses: actions/upload-artifact@v4
       with:
         name: ${{ inputs.platform }}
-        path: build/libjdk.*
+        path: build/${{ inputs.platform }}
         retention-days: 1
       if: inputs.make-target == 'static-libs' && inputs.debug-suffix != '-debug'
