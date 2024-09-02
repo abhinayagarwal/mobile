@@ -101,29 +101,76 @@ jobs:
       debug-levels: '[ "release" ]'
 
   release:
-    needs: [ build-android-linux-aarch64, build-ios-macos-aarch64,
-             build-linux-x64,
-             build-macos-x64, build-macos-aarch64,
-             build-windows-x64, build-windows-aarch64
+    needs: [
+        build-android-linux-aarch64, build-ios-macos-aarch64,
+        build-linux-x64,
+        build-macos-x64, build-macos-aarch64,
+        build-windows-x64, build-windows-aarch64
     ]
     runs-on: ubuntu-20.04
     steps:
-      - name: Download all build artifacts
+      - name: Download Android Linux AArch64 artifact
         uses: actions/download-artifact@v4
         with:
-          path: ./dist
-          pattern: '*64'
-          merge-multiple: true
-      - run: ls -R ./dist
-      - name: Zip downloaded artifact
+          name: android-linux-aarch64
+          path: ./dist/android-linux-aarch64
+
+      - name: Download iOS macOS AArch64 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-macos-aarch64
+          path: ./dist/ios-macos-aarch64
+
+      - name: Download Linux x64 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-x64
+          path: ./dist/linux-x64
+
+      - name: Download macOS x64 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-x64
+          path: ./dist/macos-x64
+
+      - name: Download macOS AArch64 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-aarch64
+          path: ./dist/macos-aarch64
+
+      - name: Download Windows x64 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-x64
+          path: ./dist/windows-x64
+
+      - name: Download Windows AArch64 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-aarch64
+          path: ./dist/windows-aarch64
+
+      - name: Check downloaded artifacts
+        run: |
+          pwd
+          ls -R ./dist
+
+      - name: Zip downloaded artifacts
         run: |
           cd ./dist
           zip -r android-linux-aarch64.zip android-linux-aarch64
           zip -r ios-macos-aarch64.zip ios-macos-aarch64
-      - name: Check downloads
+          zip -r linux-x64.zip linux-x64
+          zip -r macos-x64.zip macos-x64
+          zip -r macos-aarch64.zip macos-aarch64
+          zip -r windows-x64.zip windows-x64
+          zip -r windows-aarch64.zip windows-aarch64
+
+      - name: Check zip files
         run: |
-          pwd
-          ls -R ./dist/
+          ls -R ./dist
+
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
